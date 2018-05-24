@@ -34,6 +34,7 @@ import io.reactivex.disposables.CompositeDisposable
 import android.support.design.widget.AppBarLayout
 import android.support.v4.app.NotificationManagerCompat
 import android.util.Log
+import androidx.core.os.postDelayed
 import com.thefinestartist.finestwebview.FinestWebView
 import com.wardabbass.flickergallery.common.widgets.FlickerGridLayoutManager
 import com.wardabbass.flickergallery.service.SearchPullService
@@ -62,11 +63,20 @@ class MainActivity : AppCompatActivity() {
 
     val compositeDisposable = CompositeDisposable()
 
-    val usingAlarManager=false
-    val handler = Handler()
+    val pullHandler = Handler()
 
 
-    val pullRunnable= Runnable {
+    val pullRunnable=object: Runnable {
+        override fun run() {
+            val args = Bundle()
+            args.putString(EXTRA_JOB_CONTENTID, runningJobTag.currentId)
+            args.putString(EXTRA_JOB_QUERY, runningJobTag.tag)
+            val intent=Intent(this@MainActivity,SearchPullService::class.java)
+            intent.putExtras(args)
+            startService(intent)
+            pullHandler.postDelayed(this, (PULLING_INTERVAL_SEC*1000).toLong())
+        }
+
 
     }
 
@@ -340,43 +350,25 @@ class MainActivity : AppCompatActivity() {
         stopPollingAction.isVisible = true
         runningJobTag.currentId = if (galleryAdapter.itemCount > 0) galleryAdapter.get(0).id else ""
 
-        val args = Bundle()
-        args.putString(EXTRA_JOB_CONTENTID, runningJobTag.currentId)
-        args.putString(EXTRA_JOB_QUERY, runningJobTag.tag)
-        val intent = Intent(applicationContext, AlarmPullReceiver::class.java)
-        intent.putExtras(args)
-        val pIntent = PendingIntent.getBroadcast(this, AlarmPullReceiver.REQUEST_CODE,
-                intent, PendingIntent.FLAG_UPDATE_CURRENT)
-        val firstMillis = System.currentTimeMillis()
-        val alarm = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, firstMillis,
-                (PULLING_INTERVAL_SEC * 1000).toLong(), pIntent);
+        pullHandler.post(pullRunnable)
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         Log.d(SearchPullService.TAG, "onNewIntent ")
 
-        //   cancelPullJobIfExists() // clear last alarm
-        //runningJobTag.currentId = intent?.getStringExtra(EXTRA_JOB_CONTENTID) ?: runningJobTag.currentId
-        // handleStartPolling()
+        //update one we got from notification to not check about newer images
+        runningJobTag.currentId = intent?.getStringExtra(EXTRA_JOB_CONTENTID) ?: runningJobTag.currentId
 
-        // runningJobTag.tag= intent?.getStringExtra(EXTRA_JOB_QUERY)?:runningJobTag.currentId
-        //assume we have the same query did not change otherwise we have to set the query in the search view and load the state
-        //   cancelPullJobIfExists()
+
         pullToLoadView.initLoading()
     }
 
     private fun cancelAlarm() {
         Log.d(SearchPullService.TAG, "cancelAlarm ")
-
-        val args = Bundle()
-        val intent = Intent(applicationContext, AlarmPullReceiver::class.java)
-        intent.putExtras(args)
-        val pIntent = PendingIntent.getBroadcast(this, AlarmPullReceiver.REQUEST_CODE,
-                intent, 0)
-        val alarm = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarm.cancel(pIntent)
+        stopService( Intent(this@MainActivity,SearchPullService::class.java)
+        )
+        pullHandler.removeCallbacks(pullRunnable)
     }
 
     private fun handleStopPolling() {

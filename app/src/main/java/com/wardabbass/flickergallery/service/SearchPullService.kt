@@ -34,10 +34,12 @@ class SearchPullService : IntentService(TAG) {
     }
 
     override fun onHandleIntent(intent: Intent?) {
-        Log.d(TAG, "onHandleIntent")
         intent?.let {
           var  contentId = it.getStringExtra(EXTRA_JOB_CONTENTID)
           val  query = it.getStringExtra(EXTRA_JOB_QUERY)
+
+            Log.d(TAG, "onHandleIntent contentId $contentId and query is $query")
+
             val response = DataManager.makeSearchRequest(query, 1).executeForObject(FlickerResponse::class.java)
             if (response?.isSuccess == true) {
 
