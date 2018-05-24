@@ -1,0 +1,37 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="android:windowBackground">@color/colorPrimary</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="searchViewStyle">@style/FlickerSearchViewStyle</item>
+        <item name="android:windowContentTransitions" tools:targetApi="lollipop">true</item>
+
+        <item name="android:windowEnterTransition" tools:targetApi="lollipop">@transition/change_image_transform</item>
+        <item name="android:windowExitTransition" tools:targetApi="lollipop">@transition/change_image_transform</item>
+
+        <item name="android:windowSharedElementEnterTransition" tools:targetApi="lollipop">
+            @transition/change_image_transform</item>
+        <item name="android:windowSharedElementExitTransition" tools:targetApi="lollipop">
+            @transition/change_image_transform</item>
+    </style>
+    <style name="FullScreenTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColorSecondary">@color/white</item>
+
+    </style>
+
+    <style name="FlickerSearchViewStyle" parent="Widget.AppCompat.Light.SearchView">
+
+        <!-- Close button icon -->
+        <item name="closeIcon">@drawable/ic_close_white</item>
+        <!-- Search button icon -->
+        <item name="searchIcon">@drawable/ic_search_white</item>
+        <!-- Go/commit button icon -->
+    </style>
+</resources>
