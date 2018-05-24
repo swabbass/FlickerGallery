@@ -66,15 +66,15 @@ class MainActivity : AppCompatActivity() {
     val pullHandler = Handler()
 
 
-    val pullRunnable=object: Runnable {
+    val pullRunnable = object : Runnable {
         override fun run() {
             val args = Bundle()
             args.putString(EXTRA_JOB_CONTENTID, runningJobTag.currentId)
             args.putString(EXTRA_JOB_QUERY, runningJobTag.tag)
-            val intent=Intent(this@MainActivity,SearchPullService::class.java)
+            val intent = Intent(this@MainActivity, SearchPullService::class.java)
             intent.putExtras(args)
             startService(intent)
-            pullHandler.postDelayed(this, (PULLING_INTERVAL_SEC*1000).toLong())
+            pullHandler.postDelayed(this, (PULLING_INTERVAL_SEC * 1000).toLong())
         }
 
 
@@ -286,8 +286,8 @@ class MainActivity : AppCompatActivity() {
             lastPage = it.photos.pages
 
             pullToLoadView.isLastPage = it.photos.page == lastPage
-
-            pullToLoadView.layoutManager.scrollToPosition(0)
+            if (it.photos.page == 1)
+                pullToLoadView.layoutManager.scrollToPosition(0)
 //            toast("successs roma ")
         }
     }
@@ -366,7 +366,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun cancelAlarm() {
         Log.d(SearchPullService.TAG, "cancelAlarm ")
-        stopService( Intent(this@MainActivity,SearchPullService::class.java)
+        stopService(Intent(this@MainActivity, SearchPullService::class.java)
         )
         pullHandler.removeCallbacks(pullRunnable)
     }
